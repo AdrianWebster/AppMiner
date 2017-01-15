@@ -11,7 +11,7 @@ def idPuller():
 
     temp = []
 
-    ''' # only look at open apps for now
+    '''
     # APPROVED APPS
     sauce1 = open("HTML/approved.html", encoding='utf8')
     soup1 = bs.BeautifulSoup(sauce1, 'lxml')
@@ -43,36 +43,40 @@ def idPuller():
 
     return temp
 
-
-def pull(x):
-    temp = []
-
-    # returns an array with all the info provided by the current chrome page
-    soup = bs.BeautifulSoup(x, 'lxml')
-
-    # parse each category and append to info
-    mydivs = soup.findAll("div", {"class": "form-question-body"})
-    soup.find_all('div','class="form-question-body')
-
-    temp.append(name='')
-    temp.append(ip='')
-    temp.append(appdate='')
-    temp.append(status='')
-    temp.append(game='')
-    temp.append(firstreg='')
-    temp.append(why='')
-    temp.append(age='')
-    temp.append(live='')
-    temp.append(software='')
-    temp.append(rules='')
-    temp.append(events='')
-    temp.append(findout='')
-    temp.append(fother='')
-    temp.append(steam='')
-    temp.append(nco='')
-    temp.append(acceptdate='')
-
-    return temp
+## pull useless if not cleaned
+# def pull(x):
+#     temp = []
+#
+#     # returns an array with all the info provided by the current chrome page
+#     soup = bs.BeautifulSoup(x, 'lxml')
+#
+#     # parse each category and append to info
+#     mydivs = soup.findAll("div", {"class": "form-question-body"})
+#     soup.find_all('div','class="form-question-body')
+#
+#     temp.append(name='')
+#     temp.append(ip='')
+#
+#     temp.append(game='')
+#     temp.append(firstreg='')
+#     temp.append(why='')
+#     temp.append(age='')
+#     temp.append(live='')
+#     temp.append(software='')
+#     temp.append(rules='')
+#
+#     temp.append(events='')
+#
+#     temp.append(findout='')
+#     temp.append(fother='')
+#     temp.append(steam='')
+#
+#     temp.append(appdate='')
+#     temp.append(status='')
+#     temp.append(nco='')
+#     temp.append(acceptdate='')
+#
+#     return temp
 
 
 def urlParse(array):
@@ -92,10 +96,21 @@ def urlParse(array):
 
         # navigate to page
         driver.get(navTo)
-
-        # pull info into temp array
         html = driver.page_source
-        temp = pull(html)
+        soup = bs.BeautifulSoup(html, 'lxml')
+
+        temp=[]
+        ## gets raw html of form
+        for form in soup.find_all("div", class_="form-question-body"):
+            temp.extend(form)
+
+        ## gets raw html data of the other
+        for deets in soup.find_all("div", class_="app_header_user_details"):
+            temp.extend(deets)
+
+        ## nco and aprooval ifno
+        for nco in soup.find_all("div", class_="app_header_user_meta"):
+            temp.extend(nco)
 
         # # add temp array to main array
         people.append(temp)
@@ -107,6 +122,8 @@ print('Welcome')
 input('Press ENTER to begin...')
 raws = idPuller()
 applicants = urlParse(raws)
+
+## at this point all the info is in the system, time to test
 
 for i in range(len(applicants)):
     print(applicants[i])
