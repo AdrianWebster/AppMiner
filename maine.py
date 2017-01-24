@@ -4,7 +4,6 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
-
 def idPuller():
     # parse through the 4 html documents and export data-id to array.
     # ()->(ARRAY)
@@ -33,9 +32,8 @@ def idPuller():
     for a in soup3.find_all('a', href=True):
         temp.append(a['href'])
     '''
-
     # OPEN APPS
-    sauce4 = open("HTML/open.html", encoding='utf8')
+    sauce4 = open("HTML/quicktest.html", encoding='utf8')
     soup4 = bs.BeautifulSoup(sauce4, 'lxml')
 
     for a in soup4.find_all('a', href=True):
@@ -43,41 +41,52 @@ def idPuller():
 
     return temp
 
-## pull useless if not cleaned
-# def pull(x):
-#     temp = []
-#
-#     # returns an array with all the info provided by the current chrome page
-#     soup = bs.BeautifulSoup(x, 'lxml')
-#
-#     # parse each category and append to info
-#     mydivs = soup.findAll("div", {"class": "form-question-body"})
-#     soup.find_all('div','class="form-question-body')
-#
-#     temp.append(name='')
-#     temp.append(ip='')
-#
-#     temp.append(game='')
-#     temp.append(firstreg='')
-#     temp.append(why='')
-#     temp.append(age='')
-#     temp.append(live='')
-#     temp.append(software='')
-#     temp.append(rules='')
-#
-#     temp.append(events='')
-#
-#     temp.append(findout='')
-#     temp.append(fother='')
-#     temp.append(steam='')
-#
-#     temp.append(appdate='')
-#     temp.append(status='')
-#     temp.append(nco='')
-#     temp.append(acceptdate='')
-#
-#     return temp
+def clean(x):
+    applicants = x
+    data=[]
+    #escapes.append([chr(char) for char in range(1, 32)])
 
+    for i in range(len(applicants)):
+            current = applicants[i]
+            soup = bs.BeautifulSoup(current, 'lxml')
+
+            #
+            #
+            # for form in soup.find_all("div", class_="form-question-body"):
+            #     form = form.text.strip('\n').strip('  ').strip('%s\n')
+            #     temp.append(form)
+            #
+
+            temp = []
+            for fields in soup.find_all("div", {'class':[' element_username', 'href','app_header_user_ip','input','input-data','app_header_user_status']}):
+
+                fields = fields.text
+                temp.append(fields)
+
+
+
+            attendance = []
+            for check in soup.find_all("div", class_="chk"):
+                for box in check:
+                    if 'checked' in str(box):
+                        if 'Monday' in str(box):
+                            attendance.append('Monday')
+                        elif 'Tuesday' in str(box):
+                            attendance.append('Tuesday')
+                        elif 'Wednesday' in str(box):
+                            attendance.append('Wednesday')
+                        elif 'Thursday' in str(box):
+                            attendance.append('Thursday')
+                        elif 'Friday' in str(box):
+                            attendance.append('Friday')
+                        elif 'Saturday' in str(box):
+                            attendance.append('Saturday')
+                        elif 'Sunday' in str(box):
+                            attendance.append('Sunday')
+            temp.append(attendance)
+            data.append(temp)
+            #print (temp)
+    return data
 
 def urlParse(array):
     # go through every applicant via chrome and pull the required info, return a 2d array  of every applicant and their info. [[app1],[app2],[app3]]
@@ -100,19 +109,28 @@ def urlParse(array):
         soup = bs.BeautifulSoup(html, 'lxml')
 
         temp=[]
-        ## gets raw html of form
+
+        ## gets raw html data of the user
+        for deets in soup.find_all("div", class_="app_header_user_details"):
+            temp.extend(deets)
+
+        ## GETS ATTENDANCE
+        for check in soup.find_all("div", class_="chk"):
+            for box in check:
+                if 'checked="checked"' in str(box):
+                    temp.extend(box)
+
+        ## get raw html of form
         for form in soup.find_all("div", class_="form-question-body"):
             temp.extend(form)
 
-        ## gets raw html data of the other
-        for deets in soup.find_all("div", class_="app_header_user_details"):
-            temp.extend(deets)
 
         ## nco and aprooval ifno
         for nco in soup.find_all("div", class_="app_header_user_meta"):
             temp.extend(nco)
 
         # # add temp array to main array
+        temp = str(temp)
         people.append(temp)
 
     return people
@@ -122,10 +140,9 @@ print('Welcome')
 input('Press ENTER to begin...')
 raws = idPuller()
 applicants = urlParse(raws)
+data = clean(applicants)
+for i in range(len(data)):
+    print (data[i])
 
-## at this point all the info is in the system, time to test
-
-for i in range(len(applicants)):
-    print(applicants[i])
 
 print('Done')
